@@ -147,6 +147,7 @@
     <div class="tab" role="tab" data-deck="months"  aria-selected="true"><span class="big">〜月</span><span class="lbl">日历月份</span></div>
     <div class="tab" role="tab" data-deck="counters" aria-selected="false"><span class="big">〜ヶ月</span><span class="lbl">时长</span></div>
     <div class="tab" role="tab" data-deck="days"     aria-selected="false"><span class="big">〜日</span><span class="lbl">日期</span></div>
+    <div class="tab" role="tab" data-deck="mixed"    aria-selected="false"><span class="big">综合</span><span class="lbl">全部混合</span></div>
   </div>
 
   <div class="note" id="deckNote"></div>
@@ -273,9 +274,22 @@ const DATA = {
       {n:30,jp:"三十日",kana:"さんじゅうにち",  romaji:"sanjūnichi"},
       {n:31,jp:"三十一日",kana:"さんじゅういちにち",romaji:"sanjūichinichi"},
     ]
+  },
+  mixed: {
+    label:"综合（月＋ヶ月＋日 全部混合）",
+    note:'把 <b>〜月</b>・<b>〜ヶ月</b>・<b>〜日</b> 三套全部混在一起随机出题，检验你能否真正分辨（二月 / 二ヶ月 / 二日）。进度与各单项卡组<b>共享</b>，共 55 张。',
+    items:[] // 动态汇总，见 cardsFor()
   }
 };
-const DECKS = ["months","counters","days"];
+const REAL_DECKS = ["months","counters","days"];
+const DECKS = ["months","counters","days","mixed"];
+// 返回某卡组的卡片；综合模式汇总三套，并给每张卡标记来源 srcDeck（进度按来源 deck 存，三套共享）
+function cardsFor(deck){
+  const src = deck==="mixed" ? REAL_DECKS : [deck];
+  const out = [];
+  src.forEach(d => DATA[d].items.forEach(it => out.push(Object.assign({srcDeck:d}, it))));
+  return out;
+}
 
 /* ----------------------------- 状态 / 存储 ----------------------------- */
 const LS_PROG = "jdq_progress_v1";   // { "months-4":"known"|"unknown", ... }
@@ -309,13 +323,12 @@ function shuffle(arr){
 function statusOf(deck, n){ return progress[keyOf(deck,n)] || "new"; }
 
 function buildQueue(){
-  const deck = prefs.deck;
-  let items = DATA[deck].items.slice();
-  if(prefs.onlyUnknown) items = items.filter(it => statusOf(deck, it.n) !== "known");
+  let items = cardsFor(prefs.deck);
+  if(prefs.onlyUnknown) items = items.filter(c => statusOf(c.srcDeck, c.n) !== "known");
   // 优先级：还不会(0) > 没练过(1) > 已掌握(2)，组内打乱
-  const w = it => { const s = statusOf(deck, it.n); return s==="unknown"?0 : s==="new"?1 : 2; };
+  const w = c => { const s = statusOf(c.srcDeck, c.n); return s==="unknown"?0 : s==="new"?1 : 2; };
   const groups = [[],[],[]];
-  items.forEach(it => groups[w(it)].push(it));
+  items.forEach(c => groups[w(c)].push(c));
   queue = [].concat(shuffle(groups[0]), shuffle(groups[1]), shuffle(groups[2]));
   pos = 0;
 }
@@ -330,11 +343,10 @@ const els = {
 };
 
 function renderStats(){
-  const deck = prefs.deck;
-  const items = DATA[deck].items;
+  const items = cardsFor(prefs.deck);
   let k=0,u=0,nw=0;
-  items.forEach(it=>{ const s=statusOf(deck,it.n); if(s==="known")k++; else if(s==="unknown")u++; else nw++; });
-  const total = items.length;
+  items.forEach(c=>{ const s=statusOf(c.srcDeck,c.n); if(s==="known")k++; else if(s==="unknown")u++; else nw++; });
+  const total = items.length || 1;
   els.cK.textContent=k; els.cU.textContent=u; els.cN.textContent=nw;
   els.barK.style.width = (k/total*100)+"%";
   els.barU.style.width = (u/total*100)+"%";
@@ -366,7 +378,7 @@ function renderCard(){
   els.romaji.style.display = prefs.showRomaji ? "" : "none";
   if(it.alt){ els.alt.hidden=false; els.alt.innerHTML = "另一种读法：<b>"+it.alt+"</b>"; }
   else els.alt.hidden=true;
-  const s = statusOf(prefs.deck, it.n);
+  const s = statusOf(it.srcDeck, it.n);
   const mark = s==="known"?"✅ ":s==="unknown"?"❌ ":"";
   els.idx.textContent = mark + "第 "+(pos+1)+" / "+queue.length;
   setBadge(els.badgeFront,it); setBadge(els.badgeBack,it);
@@ -398,7 +410,7 @@ function toast(msg){
 function mark(status){
   if(queue.length===0) return;
   const it = queue[pos];
-  progress[keyOf(prefs.deck, it.n)] = status;
+  progress[keyOf(it.srcDeck, it.n)] = status;
   saveJSON(LS_PROG, progress);
   renderStats();
   next(true);
@@ -452,11 +464,12 @@ $("onlyUnknown").addEventListener("change", e=>{ prefs.onlyUnknown=e.target.chec
 $("showRomaji").addEventListener("change", e=>{ prefs.showRomaji=e.target.checked; saveJSON(LS_PREF,prefs); renderCard(); });
 $("reset").addEventListener("click", ()=>{
   const lbl = DATA[prefs.deck].label;
-  if(!confirm("确定重置「"+lbl+"」的练习进度吗？此操作不可撤销。")) return;
-  DATA[prefs.deck].items.forEach(it=>{ delete progress[keyOf(prefs.deck,it.n)]; });
+  const cards = cardsFor(prefs.deck);
+  if(!confirm("确定重置「"+lbl+"」的练习进度吗？共 "+cards.length+" 张，此操作不可撤销。")) return;
+  cards.forEach(c=>{ delete progress[keyOf(c.srcDeck,c.n)]; });
   saveJSON(LS_PROG, progress);
   buildQueue(); renderCard(); renderStats();
-  toast("已重置本卡组进度");
+  toast("已重置进度");
 });
 
 document.addEventListener("keydown", e=>{
