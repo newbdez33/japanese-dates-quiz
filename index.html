@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>日语月份・日期 读法练习</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23c8463f'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='%23fff' font-family='serif'%3E月%3C/text%3E%3C/svg%3E" />
+<meta name="description" content="日语 〜月 / 〜ヶ月 / 〜日 读法翻卡练习，进度自动保存在本地。" />
+<style>
+  :root{
+    --washi:#f6f1e7;        /* paper */
+    --washi-2:#efe7d6;
+    --ink:#2b2622;          /* text */
+    --ink-soft:#6f665b;
+    --vermilion:#c8463f;    /* 朱色 accent */
+    --vermilion-d:#a8362f;
+    --green:#3f7d5a;
+    --green-bg:#e6f0e8;
+    --amber:#b9852b;
+    --amber-bg:#f6ecd6;
+    --line:#ded3bf;
+    --card:#fffdf8;
+    --shadow:0 10px 30px rgba(60,45,25,.14);
+    --radius:18px;
+    --maxw:560px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --washi:#1d1b18;--washi-2:#242019;--ink:#efe7d8;--ink-soft:#a99e8c;
+      --vermilion:#e0685f;--vermilion-d:#c8463f;--green:#7fc29a;--green-bg:#1f2d25;
+      --amber:#e0b25c;--amber-bg:#2e2718;--line:#3a342b;--card:#26221c;
+      --shadow:0 10px 30px rgba(0,0,0,.45);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(900px 500px at 100% -10%, color-mix(in srgb,var(--vermilion) 8%, transparent), transparent 60%),
+      var(--washi);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic UI","Microsoft YaHei","PingFang SC",sans-serif;
+    line-height:1.5;
+    -webkit-text-size-adjust:100%;
+    min-height:100dvh;
+  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:18px 16px 40px;}
+  header.top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  header.top h1{font-size:1.18rem;margin:0;letter-spacing:.5px}
+  header.top .sub{color:var(--ink-soft);font-size:.82rem}
+
+  /* deck tabs */
+  .tabs{display:flex;gap:8px;margin:14px 0 10px}
+  .tab{
+    flex:1;cursor:pointer;border:1px solid var(--line);background:var(--card);
+    color:var(--ink-soft);border-radius:12px;padding:10px 6px;text-align:center;
+    transition:.15s;user-select:none;
+  }
+  .tab .big{display:block;font-size:1.25rem;color:var(--ink);font-weight:600;line-height:1.1}
+  .tab .lbl{font-size:.72rem;display:block;margin-top:2px}
+  .tab[aria-selected="true"]{
+    border-color:var(--vermilion);color:var(--vermilion);
+    box-shadow:inset 0 -3px 0 var(--vermilion);background:color-mix(in srgb,var(--vermilion) 7%,var(--card));
+  }
+  .tab[aria-selected="true"] .big{color:var(--vermilion)}
+
+  .note{
+    font-size:.78rem;color:var(--ink-soft);background:var(--washi-2);
+    border:1px dashed var(--line);border-radius:10px;padding:8px 10px;margin-bottom:12px;
+  }
+  .note b{color:var(--vermilion)}
+
+  /* stats */
+  .stats{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+  .bar{flex:1;height:10px;border-radius:99px;background:var(--washi-2);overflow:hidden;border:1px solid var(--line);display:flex}
+  .bar i{display:block;height:100%}
+  .bar .known{background:var(--green)}
+  .bar .unknown{background:var(--vermilion)}
+  .legend{display:flex;gap:12px;font-size:.74rem;color:var(--ink-soft);flex-wrap:wrap}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .dot.k{background:var(--green)}.dot.u{background:var(--vermilion)}.dot.n{background:var(--line)}
+
+  /* card */
+  .stage{perspective:1400px;margin:6px 0 14px}
+  .card{
+    position:relative;width:100%;min-height:300px;cursor:pointer;
+    transform-style:preserve-3d;transition:transform .5s cubic-bezier(.2,.7,.2,1);
+  }
+  .card.flipped{transform:rotateY(180deg)}
+  .face{
+    position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:22px;text-align:center;
+  }
+  .face .idx{position:absolute;top:12px;left:16px;font-size:.74rem;color:var(--ink-soft)}
+  .face .badge{position:absolute;top:10px;right:12px;font-size:.72rem;background:var(--amber-bg);color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 40%,transparent);padding:3px 8px;border-radius:99px;max-width:62%}
+  .front .kanji{font-size:clamp(3.4rem,18vw,5.2rem);font-weight:700;letter-spacing:2px;font-family:"Hiragino Mincho ProN","Yu Mincho","Songti SC",serif;}
+  .front .hint{margin-top:18px;font-size:.82rem;color:var(--ink-soft)}
+  .back{transform:rotateY(180deg)}
+  .back .kana{font-size:clamp(2.4rem,12vw,3.6rem);font-weight:700;color:var(--vermilion);font-family:"Hiragino Mincho ProN","Yu Mincho",serif;letter-spacing:1px}
+  .back .romaji{font-size:1.05rem;color:var(--ink-soft);margin-top:6px;font-style:italic}
+  .back .alt{font-size:.84rem;color:var(--ink-soft);margin-top:10px}
+  .back .alt b{color:var(--ink)}
+  .speak{margin-top:16px;border:1px solid var(--line);background:var(--washi-2);color:var(--ink);
+    border-radius:99px;padding:9px 16px;font-size:.95rem;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+  .speak:active{transform:scale(.97)}
+
+  /* actions */
+  .actions{display:flex;gap:10px}
+  .btn{flex:1;border:none;border-radius:14px;padding:15px 10px;font-size:1rem;font-weight:600;cursor:pointer;transition:.12s;color:#fff}
+  .btn:active{transform:translateY(1px)}
+  .btn.no{background:var(--vermilion)}
+  .btn.no:hover{background:var(--vermilion-d)}
+  .btn.yes{background:var(--green)}
+  .btn[disabled]{opacity:.4;cursor:default}
+  .actions .kbd{font-size:.7rem;opacity:.8;font-weight:400;display:block;margin-top:2px}
+
+  /* controls */
+  .controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:18px;font-size:.85rem;color:var(--ink-soft)}
+  .controls label{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+  .controls .spacer{flex:1}
+  .controls button.link{background:none;border:none;color:var(--ink-soft);text-decoration:underline;cursor:pointer;font-size:.85rem}
+  .controls button.link:hover{color:var(--vermilion)}
+  input[type=checkbox]{accent-color:var(--vermilion);width:16px;height:16px}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:var(--washi);padding:10px 18px;border-radius:99px;font-size:.9rem;
+    opacity:0;pointer-events:none;transition:.25s;box-shadow:var(--shadow);z-index:9}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .done{text-align:center;color:var(--ink-soft);padding:40px 10px}
+  .done .em{font-size:2.4rem}
+  footer{margin-top:26px;text-align:center;font-size:.72rem;color:var(--ink-soft)}
+  footer a{color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>日语月份・日期 读法练习</h1>
+    <span class="sub">翻卡自评 · 进度自动保存</span>
+  </header>
+
+  <div class="tabs" role="tablist" id="tabs">
+    <div class="tab" role="tab" data-deck="months"  aria-selected="true"><span class="big">〜月</span><span class="lbl">日历月份</span></div>
+    <div class="tab" role="tab" data-deck="counters" aria-selected="false"><span class="big">〜ヶ月</span><span class="lbl">时长</span></div>
+    <div class="tab" role="tab" data-deck="days"     aria-selected="false"><span class="big">〜日</span><span class="lbl">日期</span></div>
+  </div>
+
+  <div class="note" id="deckNote"></div>
+
+  <div class="stats">
+    <div class="bar" aria-hidden="true"><i class="known" id="barK"></i><i class="unknown" id="barU"></i></div>
+  </div>
+  <div class="legend">
+    <span><i class="dot k"></i>已掌握 <b id="cK">0</b></span>
+    <span><i class="dot u"></i>还不会 <b id="cU">0</b></span>
+    <span><i class="dot n"></i>没练过 <b id="cN">0</b></span>
+  </div>
+
+  <div class="stage">
+    <div class="card" id="card" tabindex="0" aria-label="练习卡片，点击或按空格翻面">
+      <div class="face front">
+        <span class="idx" id="idx"></span>
+        <span class="badge" id="badgeFront" hidden></span>
+        <div class="kanji" id="kanji">—</div>
+        <div class="hint">点击 / 空格 看读法</div>
+      </div>
+      <div class="face back">
+        <span class="badge" id="badgeBack" hidden></span>
+        <div class="kana" id="kana"></div>
+        <div class="romaji" id="romaji"></div>
+        <div class="alt" id="alt" hidden></div>
+        <button class="speak" id="speak" type="button">🔊 朗读发音</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn no"  id="btnNo"  type="button">❌ 还不会<span class="kbd">← 或 1</span></button>
+    <button class="btn yes" id="btnYes" type="button">✅ 记住了<span class="kbd">→ 或 2</span></button>
+  </div>
+
+  <div class="controls">
+    <label><input type="checkbox" id="onlyUnknown" /> 只练「还不会 / 没练过」</label>
+    <label><input type="checkbox" id="showRomaji" checked /> 显示罗马音</label>
+    <span class="spacer"></span>
+    <button class="link" id="reset" type="button">重置本卡组进度</button>
+  </div>
+
+  <footer>
+    数据离线保存在本浏览器（localStorage）。⚠️ 标记 = 不规则 / 易错读法。
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ----------------------------- 数据 ----------------------------- */
+const DATA = {
+  months: {
+    label:"月（日历月份）",
+    note:'日历月份用 <b>〜月（がつ）</b>。注意 <b>四月 しがつ</b>・<b>七月 しちがつ</b>・<b>九月 くがつ</b> 这三个不规则。',
+    items:[
+      {n:1, jp:"一月",  kana:"いちがつ",   romaji:"ichigatsu"},
+      {n:2, jp:"二月",  kana:"にがつ",     romaji:"nigatsu"},
+      {n:3, jp:"三月",  kana:"さんがつ",   romaji:"sangatsu"},
+      {n:4, jp:"四月",  kana:"しがつ",     romaji:"shigatsu",   warn:"读 し，不读 よん"},
+      {n:5, jp:"五月",  kana:"ごがつ",     romaji:"gogatsu"},
+      {n:6, jp:"六月",  kana:"ろくがつ",   romaji:"rokugatsu"},
+      {n:7, jp:"七月",  kana:"しちがつ",   romaji:"shichigatsu",warn:"读 しち，不读 なな"},
+      {n:8, jp:"八月",  kana:"はちがつ",   romaji:"hachigatsu"},
+      {n:9, jp:"九月",  kana:"くがつ",     romaji:"kugatsu",    warn:"读 く，不读 きゅう"},
+      {n:10,jp:"十月",  kana:"じゅうがつ", romaji:"jūgatsu"},
+      {n:11,jp:"十一月",kana:"じゅういちがつ",romaji:"jūichigatsu"},
+      {n:12,jp:"十二月",kana:"じゅうにがつ", romaji:"jūnigatsu"},
+    ]
+  },
+  counters: {
+    label:"ヶ月（时长 / 几个月）",
+    note:'时长用 <b>〜ヶ月（かげつ）</b>。这里 四=<b>よん</b>・七=<b>なな</b>・九=<b>きゅう</b>（正好和月份相反！），还有促音变化。',
+    items:[
+      {n:1, jp:"一ヶ月", kana:"いっかげつ",   romaji:"ikkagetsu",  warn:"促音 っ"},
+      {n:2, jp:"二ヶ月", kana:"にかげつ",     romaji:"nikagetsu"},
+      {n:3, jp:"三ヶ月", kana:"さんかげつ",   romaji:"sankagetsu"},
+      {n:4, jp:"四ヶ月", kana:"よんかげつ",   romaji:"yonkagetsu", warn:"读 よん（与四月相反）"},
+      {n:5, jp:"五ヶ月", kana:"ごかげつ",     romaji:"gokagetsu"},
+      {n:6, jp:"六ヶ月", kana:"ろっかげつ",   romaji:"rokkagetsu", warn:"促音 っ"},
+      {n:7, jp:"七ヶ月", kana:"ななかげつ",   romaji:"nanakagetsu",warn:"常读 なな（也可 しち）", alt:"しちかげつ"},
+      {n:8, jp:"八ヶ月", kana:"はちかげつ",   romaji:"hachikagetsu",warn:"也常读 はっかげつ", alt:"はっかげつ"},
+      {n:9, jp:"九ヶ月", kana:"きゅうかげつ", romaji:"kyūkagetsu", warn:"读 きゅう（与九月相反）"},
+      {n:10,jp:"十ヶ月", kana:"じゅっかげつ", romaji:"jukkagetsu", warn:"促音；也可 じっかげつ", alt:"じっかげつ"},
+      {n:11,jp:"十一ヶ月",kana:"じゅういっかげつ",romaji:"jūikkagetsu"},
+      {n:12,jp:"十二ヶ月",kana:"じゅうにかげつ", romaji:"jūnikagetsu"},
+    ]
+  },
+  days: {
+    label:"日（日期 / 几号）",
+    note:'1〜10 号几乎全是<b>特殊训读</b>（ついたち・ふつか…），另外 <b>十四日 じゅうよっか</b>・<b>二十日 はつか</b>・<b>二十四日 にじゅうよっか</b> 也不规则。',
+    items:[
+      {n:1, jp:"一日",  kana:"ついたち",     romaji:"tsuitachi", warn:"特殊读法（月初一号）"},
+      {n:2, jp:"二日",  kana:"ふつか",       romaji:"futsuka"},
+      {n:3, jp:"三日",  kana:"みっか",       romaji:"mikka"},
+      {n:4, jp:"四日",  kana:"よっか",       romaji:"yokka"},
+      {n:5, jp:"五日",  kana:"いつか",       romaji:"itsuka"},
+      {n:6, jp:"六日",  kana:"むいか",       romaji:"muika"},
+      {n:7, jp:"七日",  kana:"なのか",       romaji:"nanoka"},
+      {n:8, jp:"八日",  kana:"ようか",       romaji:"yōka",      warn:"与 四日 よっか 区分"},
+      {n:9, jp:"九日",  kana:"ここのか",     romaji:"kokonoka"},
+      {n:10,jp:"十日",  kana:"とおか",       romaji:"tōka"},
+      {n:11,jp:"十一日",kana:"じゅういちにち",romaji:"jūichinichi"},
+      {n:12,jp:"十二日",kana:"じゅうににち",  romaji:"jūninichi"},
+      {n:13,jp:"十三日",kana:"じゅうさんにち",romaji:"jūsannichi"},
+      {n:14,jp:"十四日",kana:"じゅうよっか",  romaji:"jūyokka",   warn:"读 よっか，不读 にち"},
+      {n:15,jp:"十五日",kana:"じゅうごにち",  romaji:"jūgonichi"},
+      {n:16,jp:"十六日",kana:"じゅうろくにち",romaji:"jūrokunichi"},
+      {n:17,jp:"十七日",kana:"じゅうしちにち",romaji:"jūshichinichi"},
+      {n:18,jp:"十八日",kana:"じゅうはちにち",romaji:"jūhachinichi"},
+      {n:19,jp:"十九日",kana:"じゅうくにち",  romaji:"jūkunichi"},
+      {n:20,jp:"二十日",kana:"はつか",       romaji:"hatsuka",   warn:"特殊读法！"},
+      {n:21,jp:"二十一日",kana:"にじゅういちにち",romaji:"nijūichinichi"},
+      {n:22,jp:"二十二日",kana:"にじゅうににち",  romaji:"nijūninichi"},
+      {n:23,jp:"二十三日",kana:"にじゅうさんにち",romaji:"nijūsannichi"},
+      {n:24,jp:"二十四日",kana:"にじゅうよっか",  romaji:"nijūyokka", warn:"读 よっか"},
+      {n:25,jp:"二十五日",kana:"にじゅうごにち",  romaji:"nijūgonichi"},
+      {n:26,jp:"二十六日",kana:"にじゅうろくにち",romaji:"nijūrokunichi"},
+      {n:27,jp:"二十七日",kana:"にじゅうしちにち",romaji:"nijūshichinichi"},
+      {n:28,jp:"二十八日",kana:"にじゅうはちにち",romaji:"nijūhachinichi"},
+      {n:29,jp:"二十九日",kana:"にじゅうくにち",  romaji:"nijūkunichi"},
+      {n:30,jp:"三十日",kana:"さんじゅうにち",  romaji:"sanjūnichi"},
+      {n:31,jp:"三十一日",kana:"さんじゅういちにち",romaji:"sanjūichinichi"},
+    ]
+  }
+};
+const DECKS = ["months","counters","days"];
+
+/* ----------------------------- 状态 / 存储 ----------------------------- */
+const LS_PROG = "jdq_progress_v1";   // { "months-4":"known"|"unknown", ... }
+const LS_PREF = "jdq_prefs_v1";      // { deck, onlyUnknown, showRomaji }
+
+function loadJSON(key, fallback){
+  try{ const v = JSON.parse(localStorage.getItem(key)); return v && typeof v==="object" ? v : fallback; }
+  catch(e){ return fallback; }
+}
+function saveJSON(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){/* 隐私模式等忽略 */}
+}
+
+let progress = loadJSON(LS_PROG, {});
+let prefs    = Object.assign({ deck:"months", onlyUnknown:false, showRomaji:true }, loadJSON(LS_PREF, {}));
+
+const keyOf = (deck, n) => deck + "-" + n;
+
+/* ----------------------------- 队列 ----------------------------- */
+let queue = [];      // 当前卡组的练习顺序（item 引用）
+let pos = 0;         // 队列指针
+let flipped = false;
+let seed = 1;        // 可复现的伪随机，避免每次 render 抖动
+
+function rng(){ seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; }
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function statusOf(deck, n){ return progress[keyOf(deck,n)] || "new"; }
+
+function buildQueue(){
+  const deck = prefs.deck;
+  let items = DATA[deck].items.slice();
+  if(prefs.onlyUnknown) items = items.filter(it => statusOf(deck, it.n) !== "known");
+  // 优先级：还不会(0) > 没练过(1) > 已掌握(2)，组内打乱
+  const w = it => { const s = statusOf(deck, it.n); return s==="unknown"?0 : s==="new"?1 : 2; };
+  const groups = [[],[],[]];
+  items.forEach(it => groups[w(it)].push(it));
+  queue = [].concat(shuffle(groups[0]), shuffle(groups[1]), shuffle(groups[2]));
+  pos = 0;
+}
+
+/* ----------------------------- 渲染 ----------------------------- */
+const $ = id => document.getElementById(id);
+const els = {
+  card:$("card"), kanji:$("kanji"), kana:$("kana"), romaji:$("romaji"), alt:$("alt"),
+  idx:$("idx"), badgeFront:$("badgeFront"), badgeBack:$("badgeBack"),
+  btnNo:$("btnNo"), btnYes:$("btnYes"), toast:$("toast"), deckNote:$("deckNote"),
+  cK:$("cK"), cU:$("cU"), cN:$("cN"), barK:$("barK"), barU:$("barU"),
+};
+
+function renderStats(){
+  const deck = prefs.deck;
+  const items = DATA[deck].items;
+  let k=0,u=0,nw=0;
+  items.forEach(it=>{ const s=statusOf(deck,it.n); if(s==="known")k++; else if(s==="unknown")u++; else nw++; });
+  const total = items.length;
+  els.cK.textContent=k; els.cU.textContent=u; els.cN.textContent=nw;
+  els.barK.style.width = (k/total*100)+"%";
+  els.barU.style.width = (u/total*100)+"%";
+}
+
+function setBadge(elBadge, item){
+  if(item && item.warn){ elBadge.hidden=false; elBadge.textContent="⚠️ "+item.warn; }
+  else { elBadge.hidden=true; elBadge.textContent=""; }
+}
+
+function renderCard(){
+  flipped=false;
+  els.card.classList.remove("flipped");
+  if(queue.length===0){
+    els.kanji.textContent = prefs.onlyUnknown ? "🎉" : "—";
+    els.idx.textContent="";
+    setBadge(els.badgeFront,null); setBadge(els.badgeBack,null);
+    els.kana.textContent = prefs.onlyUnknown ? "全部掌握啦" : "";
+    els.romaji.textContent=""; els.alt.hidden=true;
+    els.btnNo.disabled=true; els.btnYes.disabled=true;
+    return;
+  }
+  els.btnNo.disabled=false; els.btnYes.disabled=false;
+  if(pos>=queue.length) pos=0;
+  const it = queue[pos];
+  els.kanji.textContent = it.jp;
+  els.kana.textContent  = it.kana;
+  els.romaji.textContent= it.romaji;
+  els.romaji.style.display = prefs.showRomaji ? "" : "none";
+  if(it.alt){ els.alt.hidden=false; els.alt.innerHTML = "另一种读法：<b>"+it.alt+"</b>"; }
+  else els.alt.hidden=true;
+  const s = statusOf(prefs.deck, it.n);
+  const mark = s==="known"?"✅ ":s==="unknown"?"❌ ":"";
+  els.idx.textContent = mark + "第 "+(pos+1)+" / "+queue.length;
+  setBadge(els.badgeFront,it); setBadge(els.badgeBack,it);
+}
+
+function renderDeck(){
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.setAttribute("aria-selected", String(t.dataset.deck===prefs.deck));
+  });
+  els.deckNote.innerHTML = DATA[prefs.deck].note;
+  $("onlyUnknown").checked = prefs.onlyUnknown;
+  $("showRomaji").checked = prefs.showRomaji;
+  buildQueue();
+  renderCard();
+  renderStats();
+}
+
+/* ----------------------------- 交互 ----------------------------- */
+function flip(){
+  if(queue.length===0) return;
+  flipped=!flipped;
+  els.card.classList.toggle("flipped", flipped);
+}
+let toastTimer=null;
+function toast(msg){
+  els.toast.textContent=msg; els.toast.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>els.toast.classList.remove("show"),1400);
+}
+function mark(status){
+  if(queue.length===0) return;
+  const it = queue[pos];
+  progress[keyOf(prefs.deck, it.n)] = status;
+  saveJSON(LS_PROG, progress);
+  renderStats();
+  next(true);
+}
+function next(advanced){
+  pos++;
+  if(pos>=queue.length){
+    // 一轮结束：重建队列（重新按掌握情况排序）
+    const before = queue.length;
+    buildQueue();
+    if(queue.length===0){ renderCard(); return; }
+    if(advanced && before>0) toast("完成一轮，继续复习薄弱项 🔁");
+  }
+  renderCard();
+}
+
+/* 朗读：用日语语音读假名 */
+let jaVoice=null;
+function pickVoice(){
+  const vs = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+  jaVoice = vs.find(v=>/ja[-_]?JP/i.test(v.lang)) || vs.find(v=>/^ja/i.test(v.lang)) || null;
+}
+if(window.speechSynthesis){
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+}
+function speak(){
+  if(queue.length===0) return;
+  if(!window.speechSynthesis){ toast("此浏览器不支持朗读"); return; }
+  const it = queue[pos];
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(it.kana);
+    u.lang="ja-JP"; u.rate=0.85; u.pitch=1;
+    if(jaVoice) u.voice=jaVoice;
+    speechSynthesis.speak(u);
+  }catch(e){ toast("朗读失败"); }
+}
+
+/* 事件绑定 */
+els.card.addEventListener("click", flip);
+$("speak").addEventListener("click", e=>{ e.stopPropagation(); speak(); });
+els.btnNo.addEventListener("click", ()=>mark("unknown"));
+els.btnYes.addEventListener("click", ()=>mark("known"));
+
+document.getElementById("tabs").addEventListener("click", e=>{
+  const t = e.target.closest(".tab"); if(!t) return;
+  prefs.deck = t.dataset.deck; saveJSON(LS_PREF, prefs); renderDeck();
+});
+$("onlyUnknown").addEventListener("change", e=>{ prefs.onlyUnknown=e.target.checked; saveJSON(LS_PREF,prefs); buildQueue(); renderCard(); });
+$("showRomaji").addEventListener("change", e=>{ prefs.showRomaji=e.target.checked; saveJSON(LS_PREF,prefs); renderCard(); });
+$("reset").addEventListener("click", ()=>{
+  const lbl = DATA[prefs.deck].label;
+  if(!confirm("确定重置「"+lbl+"」的练习进度吗？此操作不可撤销。")) return;
+  DATA[prefs.deck].items.forEach(it=>{ delete progress[keyOf(prefs.deck,it.n)]; });
+  saveJSON(LS_PROG, progress);
+  buildQueue(); renderCard(); renderStats();
+  toast("已重置本卡组进度");
+});
+
+document.addEventListener("keydown", e=>{
+  if(e.repeat) return;
+  if(e.key===" "||e.key==="Enter"){ e.preventDefault(); flip(); }
+  else if(e.key==="ArrowRight"||e.key==="2"){ e.preventDefault(); mark("known"); }
+  else if(e.key==="ArrowLeft"||e.key==="1"){ e.preventDefault(); mark("unknown"); }
+  else if(e.key.toLowerCase()==="s"){ speak(); }
+  else if(e.key.toLowerCase()==="d"){ // 快速切换卡组
+    const i = DECKS.indexOf(prefs.deck); prefs.deck = DECKS[(i+1)%DECKS.length];
+    saveJSON(LS_PREF,prefs); renderDeck();
+  }
+});
+
+/* 启动 */
+if(!DECKS.includes(prefs.deck)) prefs.deck="months";
+renderDeck();
+</script>
+</body>
+</html>
