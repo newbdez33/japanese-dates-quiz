@@ -50,9 +50,9 @@
   header.top .sub{color:var(--ink-soft);font-size:.82rem}
 
   /* deck tabs */
-  .tabs{display:flex;gap:8px;margin:14px 0 10px}
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 10px}
   .tab{
-    flex:1;cursor:pointer;border:1px solid var(--line);background:var(--card);
+    flex:1 1 88px;cursor:pointer;border:1px solid var(--line);background:var(--card);
     color:var(--ink-soft);border-radius:12px;padding:10px 6px;text-align:center;
     transition:.15s;user-select:none;
   }
@@ -147,6 +147,7 @@
     <div class="tab" role="tab" data-deck="months"  aria-selected="true"><span class="big">〜月</span><span class="lbl">日历月份</span></div>
     <div class="tab" role="tab" data-deck="counters" aria-selected="false"><span class="big">〜ヶ月</span><span class="lbl">时长</span></div>
     <div class="tab" role="tab" data-deck="days"     aria-selected="false"><span class="big">〜日</span><span class="lbl">日期</span></div>
+    <div class="tab" role="tab" data-deck="monthwords" aria-selected="false"><span class="big">月</span><span class="lbl">读音易混</span></div>
     <div class="tab" role="tab" data-deck="mixed"    aria-selected="false"><span class="big">综合</span><span class="lbl">全部混合</span></div>
   </div>
 
@@ -276,14 +277,30 @@ const DATA = {
       {n:31,jp:"三十一日",kana:"さんじゅういちにち",romaji:"sanjūichinichi"},
     ]
   },
+  monthwords: {
+    label:"月の読み分け（含「月」的易混词）",
+    note:'同一个「月」读音会变：<b>がつ</b>（月份）/ <b>げつ</b>（星期・今月）/ <b>つき</b>（月亮・毎月），还有特殊音。看词回忆整词读法。',
+    items:[
+      {n:1, jp:"月曜日",  kana:"げつようび",     romaji:"getsuyōbi",  warn:"星期一：月读 げつ（不是 がつ）"},
+      {n:2, jp:"今月",    kana:"こんげつ",       romaji:"kongetsu",   warn:"这个月：げつ"},
+      {n:3, jp:"来月",    kana:"らいげつ",       romaji:"raigetsu",   warn:"下个月：げつ"},
+      {n:4, jp:"先月",    kana:"せんげつ",       romaji:"sengetsu",   warn:"上个月：げつ"},
+      {n:5, jp:"満月",    kana:"まんげつ",       romaji:"mangetsu",   warn:"满月：げつ"},
+      {n:6, jp:"正月",    kana:"しょうがつ",     romaji:"shōgatsu",   warn:"新年・正月：がつ"},
+      {n:7, jp:"何月",    kana:"なんがつ",       romaji:"nangatsu",   warn:"几月：がつ"},
+      {n:8, jp:"毎月",    kana:"まいつき",       romaji:"maitsuki",   warn:"每个月：つき（也读 まいげつ）", alt:"まいげつ"},
+      {n:9, jp:"月見",    kana:"つきみ",         romaji:"tsukimi",    warn:"赏月：つき"},
+      {n:10,jp:"生年月日",kana:"せいねんがっぴ", romaji:"seinengappi",warn:"出生年月日：月日 读 がっぴ！"},
+    ]
+  },
   mixed: {
-    label:"综合（月＋ヶ月＋日 全部混合）",
-    note:'把 <b>〜月</b>・<b>〜ヶ月</b>・<b>〜日</b> 三套全部混在一起随机出题，检验你能否真正分辨（二月 / 二ヶ月 / 二日）。进度与各单项卡组<b>共享</b>，共 55 张。',
+    label:"综合（全部混合）",
+    note:'把 <b>〜月</b>・<b>〜ヶ月</b>・<b>〜日</b>・<b>月的易混词</b> 全部混在一起随机出题，检验你能否真正分辨（二月 / 二ヶ月 / 二日 / 月曜日…）。进度与各单项卡组<b>共享</b>。',
     items:[] // 动态汇总，见 cardsFor()
   }
 };
-const REAL_DECKS = ["months","counters","days"];
-const DECKS = ["months","counters","days","mixed"];
+const REAL_DECKS = ["months","counters","days","monthwords"];
+const DECKS = ["months","counters","days","monthwords","mixed"];
 // 返回某卡组的卡片；综合模式汇总三套，并给每张卡标记来源 srcDeck（进度按来源 deck 存，三套共享）
 function cardsFor(deck){
   const src = deck==="mixed" ? REAL_DECKS : [deck];
